@@ -9,14 +9,33 @@
 require('middleclass')
 require('middleclass-extras')
 
+require 'lettergrid'
+
 print 'Test'
 
--- require 'game'
+function love.load()
+  
+  -- Seed random
+  local seed = os.time()
+  math.randomseed(seed);
+  math.random(); math.random(); math.random()
+  
+  
+  lg = Lettergrid(32, 24)
+  lg.position = vector(40, 30)
+  lg:randomize()
+  
+  dur = 0
+end
 
+function love.update(dt)
+  dur = dur + dt
+  if dur > 0.1 then
+    lg:randomize()
+    dur = 0
+  end
+end
 
-
-
---[[ output:
-   Creating global game variables
-  Creating the options menu buttons
-]]
+function love.draw()
+  lg:draw()
+end
