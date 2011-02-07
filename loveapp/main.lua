@@ -28,7 +28,18 @@ function love.load()
   dur = 0
 end
 
+function love.mousepressed(x, y, button)
+  lg:beginSelect(vector(x, y))
+end
+
+function love.mousereleased(x, y, button)
+  lg:endSelect(vector(x, y))
+end
+
+
 function love.update(dt)
+  lg:moveSelect(vector(love.mouse.getX(), love.mouse.getY()))
+  
   dur = dur + dt
   if dur > 0.1 then
     lg:randomize()
