@@ -14,9 +14,10 @@ function Wordlist:initialize(filename)
   self.words = {}
   self.count = 0
   
-  local file = assert(io.open(filename, 'r'), 'Word list file not found')
   
-  for line in file:lines() do 
+  -- local file = assert(io.open(filename, 'r'), string.format('Word list file not found: %s', filename))
+  
+  for line in love.filesystem.lines(filename) do 
     self.words[line] = line
     self.count = self.count + 1
   end

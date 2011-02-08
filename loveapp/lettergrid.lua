@@ -38,9 +38,10 @@ function Lettergrid:initialize(width, height, font)
 
   self.selector = {
     visible = false,
-    startpos = vector(0, 0),
-    endpos = vector(0, 0),
-    selectedPoints = {}
+    startpos = vector(1, 1),
+    endpos = vector(1, 1),
+    selectedPoints = {},
+    selectedWord = ''
   }
 
   self.scale = 1
@@ -78,11 +79,21 @@ end
 function Lettergrid:moveSelect(pos)
   local gridPos = self:screenToGrid(pos)
   self.selector.currentpos = gridPos
-  -- self.selector.endpos = gridPos
   
   self.selector.endpos = self:endpointSnappedToAngle(self.selector.startpos, gridPos)
-  
+
   self.selector.selectedPoints = self:pointsBetween(self.selector.startpos, self.selector.endpos)
+  
+  -- Only update word if we are showing the selector
+  if self.selector.visible then
+    local letters = {}
+    for i, point in ipairs(self.selector.selectedPoints) do
+      table.insert(letters, self.letters[point.x][point.y])
+    end
+  
+    self.selector.selectedWord = table.concat(letters)
+  end
+  
 end
 
 function Lettergrid:endSelect(pos)
@@ -110,6 +121,10 @@ function Lettergrid:endpointSnappedToAngle(startpos, endpos)
   local tmp = startpos + up:rotated(snapped)
 
   return vector(round(tmp.x), round(tmp.y))
+end
+
+function Lettergrid:selectedWord()
+  return self.selector.selectedWord:lower()
 end
 
 function Lettergrid:draw()
