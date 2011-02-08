@@ -124,12 +124,11 @@ function Lettergrid:endpointSnappedToAngle(startpos, endpos)
   local step = math.rad(45)
 
   local angle = -math.atan2(-velocity.y, velocity.x)
-  angle = angle + math.rad(90)
 
   local dirnum = round(angle / step) % 8
   local snapped = dirnum * step
 
-  local up = vector(0, -1) * round(velocity:len())
+  local up = vector(1, 0) * round(velocity:len())
   local tmp = startpos + up:rotated(snapped)
 
   return vector(round(tmp.x), round(tmp.y))
