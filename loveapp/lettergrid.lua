@@ -8,6 +8,7 @@
 
 require 'middleclass'
 require 'vector'
+require 'tableextras'
 
 Lettergrid = class('Lettergrid')
 
@@ -37,9 +38,9 @@ function Lettergrid:initialize(width, height, font)
 
   self.selector = {
     visible = false,
-    currentpos = vector(0, 0),
     startpos = vector(0, 0),
-    endpos = vector(0, 0)
+    endpos = vector(0, 0),
+    selectedPoints = {}
   }
 
   self.scale = 1
@@ -71,17 +72,44 @@ end
 function Lettergrid:beginSelect(pos)
   self.selector.visible = true
   self.selector.startpos = self:screenToGrid(pos)
-  self.selector.currentpos = vector(x, y)
+  self.selector.currentpos = self.selector.startpos
 end
 
 function Lettergrid:moveSelect(pos)
-  self.selector.currentpos = self:screenToGrid(pos)
+  local gridPos = self:screenToGrid(pos)
+  self.selector.currentpos = gridPos
+  -- self.selector.endpos = gridPos
+  
+  self.selector.endpos = self:endpointSnappedToAngle(self.selector.startpos, gridPos)
+  
+  self.selector.selectedPoints = self:pointsBetween(self.selector.startpos, self.selector.endpos)
 end
 
 function Lettergrid:endSelect(pos)
-  self.selector.visible = true
-  self.selector.currentpos = self:screenToGrid(pos)
+  self.selector.selectedPoints = {}
+  self.selector.visible = false
   self.selector.endpos = self:screenToGrid(pos)
+end
+
+local function round(num)
+  local mult = 10^0
+  return math.floor(num * mult + 0.5) / mult
+end
+
+function Lettergrid:endpointSnappedToAngle(startpos, endpos)
+  local velocity = endpos - startpos
+  local step = math.rad(45)
+
+  local angle = -math.atan2(-velocity.y, velocity.x)
+  angle = angle + math.rad(90)
+
+  local dirnum = round(angle / step) % 8
+  local snapped = dirnum * step
+
+  local up = vector(0, -1) * round(velocity:len())
+  local tmp = startpos + up:rotated(snapped)
+
+  return vector(round(tmp.x), round(tmp.y))
 end
 
 function Lettergrid:draw()
@@ -89,7 +117,10 @@ function Lettergrid:draw()
   
   for x = 1, self.width do
     for y = 1, self.height do
-      if (x == self.selector.currentpos.x and y == self.selector.currentpos.y) then
+      local pos = vector(x, y)
+
+      -- Draw cursor
+      if (pos == self.selector.currentpos) then
         love.graphics.setColor(255, 0, 0, 255)
         love.graphics.print('O',
                             (Lettergrid.GRIDSIZE * x + self.position.x) - Lettergrid.GRIDSIZE,
@@ -100,6 +131,11 @@ function Lettergrid:draw()
       end
 
       love.graphics.setColor(255, 255, 255, 255)
+      
+      if (self.selector.visible and table.contains(self.selector.selectedPoints, pos)) then
+        love.graphics.setColor(0, 240, 20, 255)
+      end
+
       love.graphics.print(self.letters[x][y], 
                           (Lettergrid.GRIDSIZE * x + self.position.x) - Lettergrid.GRIDSIZE,
                           (Lettergrid.GRIDSIZE * y + self.position.y) - Lettergrid.GRIDSIZE,
@@ -107,5 +143,61 @@ function Lettergrid:draw()
                           1,
                           1)
     end
+    
   end
+end
+
+-- Returns a table of vectors representing all of the points between the two supplied points 
+function Lettergrid:pointsBetween(first, second)
+  -- http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+  local x0 = first.x
+  local y0 = first.y
+  local x1 = second.x
+  local y1 = second.y
+  
+  local points = {}
+  
+  local steep = false
+  if math.abs(y1 - y0) > math.abs(x1 - x0) then steep = true end
+
+  if steep then
+    x0, y0 = y0, x0
+    x1, y1 = y1, x1
+  end             
+
+  if x0 > x1 then
+    x0, x1 = x1, x0
+    y0, y1 = y1, y0
+  end
+
+  local deltax = x1 - x0
+  local deltay = math.abs(y1 - y0)
+  local err = deltax / 2
+  local ystep = 0
+  local y = y0
+
+  if y0 < y1 then 
+    ystep = 1 
+  else 
+    ystep = -1 
+  end
+
+  for x=x0,x1 do
+    if steep then 
+      local c = vector(y, x)
+      table.insert(points, c)
+    else 
+      local c = vector(x, y)
+      table.insert(points, c)
+    end             
+
+    err = err - deltay
+
+    if err < 0 then
+       y = y + ystep
+       err = err + deltax
+    end
+  end
+  
+  return points
 end

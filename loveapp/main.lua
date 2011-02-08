@@ -6,8 +6,8 @@
 --  Copyright 2011 GloryFish.org. All rights reserved.
 -- 
 
-require('middleclass')
-require('middleclass-extras')
+require 'middleclass'
+require 'middleclass-extras'
 
 require 'lettergrid'
 
@@ -42,7 +42,7 @@ function love.update(dt)
   
   dur = dur + dt
   if dur > 0.1 then
-    lg:randomize()
+    -- lg:randomize()
     dur = 0
   end
 end
