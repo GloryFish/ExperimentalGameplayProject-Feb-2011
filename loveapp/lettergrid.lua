@@ -65,6 +65,18 @@ function Lettergrid:screenToGrid(point)
   local grid = vector(math.floor(point.x / (Lettergrid.GRIDSIZE * self.scale)),
                       math.floor(point.y / (Lettergrid.GRIDSIZE * self.scale)))
 
+  if grid.x < 1 then
+    grid.x = 1
+  elseif grid.x > self.width then
+    grid.x = self.width
+  end
+
+  if grid.y < 1 then
+    grid.y = 1
+  elseif grid.y > self.height then
+    grid.y = self.height
+  end
+
   return grid
 
 end
