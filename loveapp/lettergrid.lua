@@ -13,7 +13,11 @@ require 'tableextras'
 Lettergrid = class('Lettergrid')
 
 Lettergrid.LETTERS = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}
+Lettergrid.VOWELS = {'A', 'E', 'I', 'O', 'U'}
+Lettergrid.CONSONANTS = {'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'}
+
 Lettergrid.GRIDSIZE = 28
+
 
 function Lettergrid:initialize(width, height, font)
   self.width = width
@@ -57,10 +61,14 @@ end
 
 -- Returns a random letter
 function Lettergrid:randomLetter()
-  return Lettergrid.LETTERS[math.random(1, #Lettergrid.LETTERS)]
+  local rnd = math.random();
+  if rnd > 0.3 then
+    return Lettergrid.CONSONANTS[math.random(1, #Lettergrid.CONSONANTS)]
+  else
+    return Lettergrid.VOWELS[math.random(1, #Lettergrid.VOWELS)]
+  end
 end
 
--- Returns a random letter
 function Lettergrid:screenToGrid(point)
   local grid = vector(math.floor(point.x / (Lettergrid.GRIDSIZE * self.scale)),
                       math.floor(point.y / (Lettergrid.GRIDSIZE * self.scale)))
