@@ -111,9 +111,20 @@ function Lettergrid:moveSelect(pos)
       table.insert(letters, self.letters[point.x][point.y])
     end
   
+    
+    local velocity = self.selector.endpos - self.selector.startpos
+    if velocity.x < 0 or velocity.y < 0 then
+      local tmp = {}
+
+      for i = #letters, 1, -1 do
+        table.insert(tmp, letters[i])
+      end
+      
+      letters = tmp
+    end
+
     self.selector.selectedWord = table.concat(letters)
   end
-  
 end
 
 function Lettergrid:endSelect(pos)
